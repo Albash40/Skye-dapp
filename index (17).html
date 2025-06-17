@@ -1,0 +1,1387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>SKYE dApp</title>
+  <meta name="description" content="Skye Web3 dApp - Proof of Action, P2P, Wallet, Premium, and more">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Orbitron:wght@700&display=swap" rel="stylesheet">
+  <link rel="icon" href="https://i.imgur.com/Eo6z5xV.png">
+  <style>
+    :root {
+      --primary: #0080ff;
+      --secondary: #232946;
+      --background: #121826;
+      --surface: #1e253b;
+      --accent: #2d9cdb;
+      --success: #16c784;
+      --error: #f44336;
+      --warning: #f9a825;
+      --light: #f8fafd;
+      --dark: #181b20;
+      --radius: 20px;
+      --sidebar-width: 240px;
+      --transition: all 0.3s cubic-bezier(.4,0,.2,1);
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Montserrat', Arial, sans-serif;
+      background: var(--background);
+      color: var(--light);
+      margin: 0;
+      min-height: 100vh;
+      overflow-x: hidden;
+      transition: background 0.2s;
+    }
+    a, button { text-decoration: none; font-family: inherit; cursor: pointer; }
+    .animated {
+      animation: fadeInUp 0.7s cubic-bezier(.4,0,.2,1);
+    }
+    @keyframes fadeInUp {
+      0% { opacity:0; transform: translateY(40px);}
+      100%{ opacity:1; transform: translateY(0);}
+    }
+    /* Top Navbar */
+    .topnav {
+      display: flex;
+      align-items: center;
+      padding: 0 1.5rem;
+      height: 64px;
+      background: var(--surface);
+      border-bottom: 1px solid #23294644;
+      z-index: 1002;
+      position: sticky; top: 0;
+    }
+    .menu-btn {
+      background: none;
+      border: none;
+      font-size: 1.8rem;
+      color: var(--primary);
+      margin-right: 1rem;
+      transition: color .2s;
+    }
+    .topnav-logo {
+      display: flex; align-items: center;
+    }
+    .topnav-logo img {
+      width: 40px; height: 40px; border-radius: 50%; margin-right: .5rem;
+    }
+    .topnav-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 2rem;
+      letter-spacing: 2px;
+      color: var(--primary);
+    }
+    .topnav-profile {
+      margin-left: auto;
+      display: flex; align-items: center;
+      gap: 1rem;
+    }
+    .topnav-profile-img {
+      width: 38px; height: 38px; border-radius: 50%;
+      border: 2px solid var(--primary);
+      background: #fff;
+      object-fit: cover;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      position: fixed;
+      left: 0; top: 0; bottom: 0;
+      width: var(--sidebar-width);
+      background: var(--surface);
+      border-right: 1px solid #23294644;
+      padding: 90px 0 70px 0;
+      display: flex; flex-direction: column; align-items: stretch;
+      gap: .25rem;
+      z-index: 1001;
+      transition: var(--transition);
+      transform: translateX(0);
+    }
+    .sidebar.closed { transform: translateX(-110%); }
+    .sidebar .nav-section {
+      padding: 0 1.5rem;
+    }
+    .sidebar .nav-link {
+      display: flex; align-items: center;
+      padding: 12px 0;
+      font-size: 1.12rem;
+      font-weight: 500;
+      color: var(--light);
+      border-radius: 8px;
+      transition: background .16s, color .16s;
+      margin-bottom: 2px;
+      gap: .75rem;
+      border-left: 3px solid transparent;
+    }
+    .sidebar .nav-link.active,
+    .sidebar .nav-link:hover {
+      background: #263159;
+      color: var(--primary);
+      border-left: 3px solid var(--primary);
+    }
+    .sidebar .nav-link svg { width:1.5rem; height: 1.5rem; }
+    /* Overlay for mobile sidebar */
+    .sidebar-overlay {
+      display: none;
+      position: fixed; left:0; top:0;width:100vw;height:100vh;
+      background: rgba(30,37,59,0.65);
+      z-index: 1000;
+      opacity: 0; pointer-events: none;
+      transition: opacity .2s;
+    }
+    .sidebar-overlay.open { display: block; opacity: 1; pointer-events: auto; }
+
+    /* Main Content */
+    .main-content {
+      margin-left: var(--sidebar-width);
+      min-height: calc(100vh - 64px - 60px);
+      padding: 2.2rem 2vw 90px 2vw;
+      transition: margin .3s;
+    }
+    .sidebar.closed ~ .main-content { margin-left:0;}
+    @media (max-width: 900px) {
+      .sidebar { left:0; top:0; width: 80vw; min-width:220px; max-width: 320px;}
+      .main-content { margin-left: 0;}
+    }
+    @media (max-width: 700px) {
+      .sidebar { width: 92vw;}
+      .main-content { padding: 1.1rem 1vw 90px 1vw; }
+    }
+    @media (max-width: 600px) {
+      .topnav { padding: 0 .5rem; }
+      .main-content { padding: .8rem 0 90px 0;}
+    }
+
+    /* Bottom Navbar */
+    .bottom-navbar {
+      position: fixed;
+      left: 0; right: 0; bottom: 0;
+      height: 60px;
+      background: var(--surface);
+      border-top: 1px solid #23294644;
+      display: flex; align-items: center; justify-content: space-around;
+      z-index: 1003;
+    }
+    .bottom-navbar .nav-btn {
+      color: var(--light);
+      font-size: 1.3rem;
+      display: flex; flex-direction: column; align-items: center;
+      gap: 3px;
+      border: none; background: none;
+      font-weight: 600;
+      transition: color .18s;
+      min-width: 60px;
+      padding: 2px 0;
+    }
+    .bottom-navbar .nav-btn.active,
+    .bottom-navbar .nav-btn:hover { color: var(--primary);}
+    .bottom-navbar .nav-btn span {
+      font-size:.84rem; font-weight:500;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 9px;}
+    ::-webkit-scrollbar-thumb { background: #23294644; border-radius: 6px;}
+    ::-webkit-scrollbar-track { background: transparent;}
+
+    /* General Cards & Layout */
+    .card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: 0 2px 12px #23294620;
+      margin-bottom: 1.5rem;
+      padding: 1.5rem 1.2rem;
+      animation: fadeInUp .6s;
+      position: relative;
+    }
+    .card-title {
+      font-size: 1.18rem;
+      font-weight: 600;
+      margin-bottom: .6rem;
+      color: var(--primary);
+    }
+
+    /* Dashboard Styles */
+    .skye-bg {
+      position: absolute; inset:0;
+      z-index: 0;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 7vw;
+      font-weight: 900;
+      opacity: .05;
+      color: var(--primary);
+      user-select: none;
+      pointer-events: none;
+      text-align: center;
+      letter-spacing: 10px;
+      line-height: 1;
+      top: 5vw;
+    }
+    .dashboard-circle {
+      margin: 38px auto 30px auto;
+      width: 260px; height: 260px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--accent), var(--secondary) 80%);
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 6px 32px #0090ff44;
+      position: relative;
+      overflow: hidden;
+      animation: pulse 1.5s infinite alternate cubic-bezier(.4,0,.2,1);
+    }
+    @keyframes pulse {
+      0% { box-shadow: 0 6px 32px #0090ff33;}
+      100%{ box-shadow: 0 12px 42px #0090ff66;}
+    }
+    .dashboard-circle-inner {
+      background: #131b2e;
+      width: 210px; height: 210px;
+      border-radius: 50%;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 10px;
+      z-index: 1;
+      position: relative;
+    }
+    .circle-btn {
+      background: var(--success);
+      color: #fff;
+      padding: 26px 38px;
+      font-size: 2.4rem;
+      border-radius: 60px;
+      border: none;
+      font-weight: bold;
+      margin-bottom: 6px;
+      box-shadow: 0 2px 16px #16c78444;
+      transition: background .2s, transform .12s;
+      cursor: pointer;
+      animation: popIn .7s cubic-bezier(.4,0,.2,1);
+    }
+    .circle-btn:disabled {
+      background: #444c;
+      opacity: .7;
+      cursor: not-allowed;
+    }
+    @keyframes popIn {
+      0% { transform: scale(.6);}
+      100%{ transform: scale(1);}
+    }
+    .circle-countdown {
+      font-size: 1.08rem;
+      font-weight: 600;
+      color: var(--accent);
+      background: #232946cc;
+      padding: 4px 18px;
+      border-radius: 18px;
+      letter-spacing: 1px;
+      margin-top: 7px;
+      transition: color .2s;
+    }
+
+    /* Social Earn Grid */
+    .social-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin-bottom: 1rem;
+      z-index: 1;
+      position: relative;
+    }
+    .social-btn {
+      background: linear-gradient(120deg, #283e51, #485563);
+      color: #fff;
+      border-radius: 14px;
+      padding: 1rem;
+      display: flex; align-items: center; justify-content: center;
+      gap: .85rem;
+      font-size: 1rem;
+      font-weight: 600;
+      border: none;
+      box-shadow: 0 2px 12px #23294611;
+      cursor: pointer;
+      transition: background .18s, transform .11s;
+      position: relative;
+      overflow: hidden;
+      min-height: 60px;
+    }
+    .social-btn:active { transform: scale(0.97);}
+    .social-btn .logo { font-size: 2rem;}
+    .social-btn:disabled {
+      background: #23294655;
+      color: #aaa;
+      cursor: not-allowed;
+    }
+    .verify-spinner {
+      width: 21px; height: 21px; border: 3px solid #fff3; border-top: 3px solid #fff;
+      border-radius: 50%; animation: spin 1s linear infinite;
+      display: inline-block; margin-right: .6rem;
+      vertical-align: middle;
+    }
+    @keyframes spin { 100% { transform: rotate(360deg);} }
+
+    /* Proof of Action Form */
+    .poa-form {
+      display: flex; flex-direction: column; gap: 1rem;
+      margin: 24px 0 16px 0;
+      background: #20284c;
+      border-radius: 16px;
+      padding: 1.2rem;
+      box-shadow: 0 2px 8px #0080ff24;
+      z-index: 1;
+      position: relative;
+    }
+    .poa-form label { font-weight: 600; color: var(--primary);}
+    .poa-form input[type="text"] {
+      font-size: 1.1rem; border-radius: 8px; border: none;
+      padding: .7rem 1rem; background: #131b2e; color: #fff;
+      outline: 2px solid #23294644; transition: outline .2s;
+    }
+    .poa-form input[type="text"]:focus { outline:2px solid var(--primary);}
+    .poa-form .submit-btn {
+      background: var(--primary); color: #fff;
+      padding: .7rem 1.2rem; border-radius: 8px; border: none;
+      font-size: 1.1rem; font-weight: 600; cursor: pointer;
+      transition: background .17s;
+      box-shadow: 0 1px 5px #0080ff20;
+    }
+    .poa-form .submit-btn:disabled {
+      background: #23294655; color: #aaa; cursor: not-allowed;
+    }
+    .poa-form .error-msg {
+      color: var(--error); font-size: 1rem; font-weight: 500; margin-top: .3rem;
+    }
+    .poa-form .success-msg {
+      color: var(--success); font-size: 1rem; font-weight: 500; margin-top: .3rem;
+    }
+
+    /* Section Title */
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 1.2rem;
+      margin-top: .3rem;
+      letter-spacing: 1px;
+      z-index: 1;
+    }
+    /* Section Description */
+    .section-desc {
+      font-size: 1.08rem;
+      color: #d2e4ffcc;
+      margin-bottom: 1.1rem;
+      font-weight: 500;
+    }
+
+    /* P2P Section */
+    .p2p-info {
+      background: #212947;
+      border-radius: 16px;
+      padding: 1.2rem 1rem;
+      margin-bottom: 1.1rem;
+      font-size: 1.08rem;
+      color: #d6eaff;
+      box-shadow: 0 2px 10px #0080ff15;
+    }
+    .p2p-big-btn {
+      background: var(--primary);
+      color: #fff;
+      padding: 1.4rem 2.7rem;
+      border-radius: 16px;
+      font-size: 1.3rem;
+      font-weight: bold;
+      border: none;
+      margin: 18px auto 0 auto;
+      display: block;
+      transition: background .2s, transform .13s;
+      box-shadow: 0 4px 16px #0080ff33;
+    }
+    .p2p-big-btn:active { transform: scale(.97);}
+    .p2p-big-btn:disabled { background: #23294655; color: #aaa;}
+
+    .p2p-form,
+    .premium-form {
+      display: flex; flex-direction: column; gap: 1.2rem;
+      background: #212947;
+      border-radius: 16px;
+      padding: 1.2rem 1rem;
+      margin-top: 1.2rem;
+      box-shadow: 0 2px 10px #0080ff15;
+    }
+    .p2p-form label,
+    .premium-form label { font-weight: 600; color: var(--primary);}
+    .p2p-form input,
+    .premium-form input {
+      font-size: 1.1rem; border-radius: 8px; border: none;
+      padding: .7rem 1rem; background: #131b2e; color: #fff;
+      outline: 2px solid #23294644; transition: outline .2s;
+    }
+    .p2p-form input:focus,
+    .premium-form input:focus { outline:2px solid var(--primary);}
+    .p2p-form .action-btn,
+    .premium-form .action-btn {
+      background: var(--primary); color: #fff;
+      padding: .7rem 1.2rem; border-radius: 8px; border: none;
+      font-size: 1.1rem; font-weight: 600; cursor: pointer;
+      transition: background .17s;
+      box-shadow: 0 1px 5px #0080ff20;
+      margin-top: .5rem;
+    }
+    .p2p-form .action-btn:disabled,
+    .premium-form .action-btn:disabled {
+      background: #23294655; color: #aaa; cursor: not-allowed;
+    }
+    .p2p-confirm {
+      background: #16c78415; color: var(--success);
+      padding: 1rem; border-radius: 12px; margin-top: 1rem;
+      font-weight: 600; font-size: 1.13rem;
+      text-align: center;
+      box-shadow: 0 2px 8px #16c78422;
+    }
+    .copy-btn {
+      background: #232946;
+      color: var(--primary);
+      border: none;
+      border-radius: 7px;
+      padding: 5px 11px;
+      font-weight: 500;
+      font-size: .95rem;
+      margin-left: 8px;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .copy-btn:active { background: var(--primary); color: #fff;}
+
+    /* Wallet Section */
+    .wallet-balance {
+      font-size: 2.2rem;
+      font-family: 'Orbitron', sans-serif;
+      color: var(--success);
+      margin: 1.7rem 0 1.1rem 0;
+      text-align: center;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+    }
+    .wallet-connect-btn {
+      background: var(--primary);
+      color: #fff;
+      padding: .9rem 1.6rem;
+      border-radius: 14px;
+      font-size: 1.15rem; font-weight: bold;
+      border: none;
+      margin: .8rem auto 0 auto;
+      display: block;
+      transition: background .2s;
+      box-shadow: 0 2px 18px #0090ff22;
+    }
+    .wallet-connect-btn:active { background: #005bb5;}
+    .wallet-warning {
+      color: var(--warning);
+      font-size: 1rem;
+      text-align: center;
+      margin-top: 10px;
+    }
+    .wallet-actions {
+      display: flex; justify-content: center; gap: 1.2rem; margin-top: 1.4rem;
+    }
+    .wallet-actions .wallet-action-btn {
+      background: #20284c;
+      color: var(--primary);
+      border: none;
+      border-radius: 10px;
+      padding: .8rem 1.5rem;
+      font-weight: 600;
+      font-size: 1.02rem;
+      box-shadow: 0 2px 10px #0080ff14;
+      cursor: pointer;
+      transition: background .16s;
+    }
+    .wallet-actions .wallet-action-btn:active { background: var(--primary); color: #fff;}
+
+    /* Profile Section */
+    .profile-card {
+      background: #232946;
+      border-radius: 18px;
+      padding: 1.5rem 1.3rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 2px 8px #0080ff22;
+      position: relative;
+      z-index: 1;
+    }
+    .profile-title {
+      font-size: 1.35rem;
+      color: var(--primary);
+      font-weight: 700;
+      margin-bottom: .8rem;
+      letter-spacing: 1px;
+    }
+    .profile-row { display: flex; align-items: center; gap: 1.4rem; margin-bottom: .5rem;}
+    .profile-label { color: #b2cdfa; font-weight: 500; width: 100px;}
+    .profile-value { font-weight: 700;}
+    .profile-badge {
+      background: var(--success);
+      color: #fff;
+      padding: 3px 12px;
+      border-radius: 9px;
+      font-weight: 600;
+      margin-left: .7rem;
+      font-size: .99rem;
+    }
+    .profile-badge.free {
+      background: #666;
+      color: #fff;
+    }
+    .progress-container {
+      margin: 1.2rem 0 .7rem 0;
+    }
+    .progress-label {
+      font-size: 1rem;
+      color: #b2cdfa;
+      margin-bottom: .5rem;
+    }
+    .progress-bar-wrap {
+      background: #1d233a; border-radius: 8px; height: 14px;
+      overflow: hidden; width: 100%; margin-bottom: .4rem;
+    }
+    .progress-bar {
+      background: var(--primary);
+      height: 14px; border-radius: 8px;
+      transition: width .5s;
+    }
+    .progress-percent {
+      font-size: .97rem;
+      color: #16c784;
+      font-weight: 600;
+      margin-left: 10px;
+    }
+    .profile-ref-link {
+      background: #212947;
+      color: var(--primary);
+      padding: 7px 13px;
+      border-radius: 9px;
+      font-size: 1.01rem;
+      margin-right: 10px;
+      font-weight: 600;
+      word-break: break-all;
+      display: inline-block;
+    }
+    .ref-copy-btn {
+      background: var(--primary);
+      color: #fff;
+      border-radius: 7px;
+      border: none;
+      padding: 4px 10px;
+      font-size: .95rem;
+      margin-left: 7px;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .ref-copy-btn:active { background: var(--success); color: #fff;}
+
+    /* Roadmap, Tokenomics, Whitepaper, Play2Earn, ContactUs */
+    .roadmap-img {
+      display: block; margin: 0 auto 2rem auto; max-width: 99%; border-radius: 14px;
+      box-shadow: 0 2px 12px #0080ff22;
+    }
+    .whitepaper-content, .tokenomics-content {
+      background: #20284c; border-radius: 16px;
+      padding: 1.5rem 1rem; margin-bottom: 2rem; color: #f8fafd;
+      box-shadow: 0 2px 8px #0080ff22; font-size: 1.08rem;
+    }
+    .whitepaper-content h2, .tokenomics-content h2 { color: var(--primary);}
+    .whitepaper-content h3, .tokenomics-content h3 { color: #16c784;}
+    .whitepaper-content ul, .tokenomics-content ul { margin-left: 1.2rem;}
+    .coming-soon {
+      background: #181b20; border-radius: 17px; color: #bbb;
+      padding: 2.5rem 1.4rem; font-size: 1.6rem;
+      text-align: center; margin: 2rem 0;
+      font-weight: 600; letter-spacing: 1.5px;
+      box-shadow: 0 2px 12px #0080ff11;
+    }
+    .contact-links {
+      display: flex; flex-direction: column; gap: 1rem;
+      background: #20284c; border-radius: 15px;
+      padding: 2rem 1.2rem; margin: 2rem 0;
+      font-size: 1.2rem;
+    }
+    .contact-link {
+      color: var(--primary); font-weight: 600;
+      display: flex; align-items: center; gap: .7rem;
+      text-decoration: none;
+      transition: color .15s;
+    }
+    .contact-link:hover { color: var(--success);}
+    .contact-link svg { width: 1.5rem; height: 1.5rem; }
+
+    /* Earn+ Section */
+    .earnplus-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin-bottom: 1rem;
+      z-index: 1;
+      position: relative;
+    }
+    .earnplus-btn {
+      background: linear-gradient(120deg, #485563, #29323c);
+      color: #fff;
+      border-radius: 14px;
+      padding: 1rem;
+      display: flex; align-items: center; justify-content: center;
+      gap: .85rem;
+      font-size: 1.09rem;
+      font-weight: 600;
+      border: none;
+      box-shadow: 0 2px 12px #23294611;
+      cursor: pointer;
+      transition: background .18s, transform .11s;
+      position: relative;
+      overflow: hidden;
+      min-height: 60px;
+    }
+    .earnplus-btn:active { transform: scale(0.97);}
+    .earnplus-btn .logo { font-size: 2rem;}
+    .earnplus-btn:disabled {
+      background: #23294677;
+      color: #aaa;
+      cursor: not-allowed;
+    }
+    .verify-spinner {
+      width: 21px; height: 21px; border: 3px solid #fff3; border-top: 3px solid #fff;
+      border-radius: 50%; animation: spin 1s linear infinite;
+      display: inline-block; margin-right: .6rem;
+      vertical-align: middle;
+    }
+    @media (max-width: 700px) {
+      .dashboard-circle { width: 90vw; height: 90vw; max-width:330px; max-height:330px;}
+      .dashboard-circle-inner { width: 75vw; height: 75vw; max-width:260px; max-height:260px;}
+    }
+    @media (max-width: 600px) {
+      .dashboard-circle { width: 78vw; height: 78vw;}
+      .dashboard-circle-inner { width: 62vw; height: 62vw;}
+      .main-content { padding-bottom: 90px;}
+    }
+  </style>
+</head>
+<body>
+  <!-- Sidebar (Collapsible) -->
+  <nav class="sidebar" id="sidebar">
+    <div class="nav-section">
+      <a href="#" class="nav-link active" data-section="dashboard"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8v-10h-8v10zm0-18v6h8V3h-8z"/></svg>Dashboard</a>
+      <a href="#" class="nav-link" data-section="p2p"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M17 18v-5h-2v5h-3v-7h-2v7H3v-8l9-4l9 4v8z"/></svg>P2P</a>
+      <a href="#" class="nav-link" data-section="wallet"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M21 7H3V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2zm0 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-9h18zm-9 3a1 1 0 1 0 0 2a1 1 0 0 0 0-2z"/></svg>Wallet</a>
+      <a href="#" class="nav-link" data-section="profile"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 12a5 5 0 1 0 0-10a5 5 0 0 0 0 10zm0 2c-3.33 0-10 1.67-10 5v3h20v-3c0-3.33-6.67-5-10-5z"/></svg>Profile</a>
+      <a href="#" class="nav-link" data-section="roadmap"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M4 2a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H4zm0 2h16v16H4V4zm3 2v12h2V6H7zm8 0v12h2V6h-2zm-4 4v8h2v-8h-2z"/></svg>Roadmap</a>
+      <a href="#" class="nav-link" data-section="whitepaper"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9zm5 18H6V4h7v5h5zm-7-9h2v6h-2zm0 8h2v2h-2zm8-16h-2v6h2z"/></svg>Whitepaper</a>
+      <a href="#" class="nav-link" data-section="play2earn"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M17 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zm0 18H7V4h10zm-7-7h4v-2h-4zm0-4h4V5h-4z"/></svg>Play to Earn</a>
+      <a href="#" class="nav-link" data-section="earnplus"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M11 17h2v-1h-2v1zm0-2h2v-6h-2v6zm1-15C5.477 0 0 5.477 0 12a12 12 0 0 0 18.364 10.364l-1.415-1.415A10 10 0 1 1 21 12h-2a8 8 0 1 0-8-8zm-1 17h2v-1h-2v1z"/></svg>Earn Plus</a>
+      <a href="#" class="nav-link" data-section="contact"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M21 8V7l-3 2.29V7a2 2 0 0 0-2-2H8C6.9 5 6 5.9 6 7v2.29L3 7v1l9 7l9-7z"/></svg>Contact Us</a>
+      <a href="#" class="nav-link" data-section="tokenomics"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 2A10 10 0 1 0 22 12A10 10 0 0 0 12 2zM4 12A8 8 0 1 1 12 20A8 8 0 0 1 4 12zm5-1h2V7h2v4h2V7a2 2 0 0 0-2-2h-2A2 2 0 0 0 9 7zm7 2v2.09a6.978 6.978 0 0 1-6.99 6.91A7 7 0 0 1 5 13v-2h2v2a5 5 0 0 0 5 5a5 5 0 0 0 5-5V13h2z"/></svg>Tokenomics</a>
+    </div>
+  </nav>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- Top Navigation -->
+  <header class="topnav">
+    <button class="menu-btn" id="menuBtn" aria-label="Toggle menu">&#9776;</button>
+    <div class="topnav-logo">
+      <img src="https://i.imgur.com/Eo6z5xV.png" alt="Skye Logo">
+      <span class="topnav-title">SKYE</span>
+    </div>
+    <div class="topnav-profile">
+      <img class="topnav-profile-img" id="profilePic" src="https://randomuser.me/api/portraits/men/32.jpg" alt="Profile">
+    </div>
+  </header>
+
+  <!-- Main Content Area -->
+  <main class="main-content" id="mainContent">
+
+    <!-- Dashboard (default) -->
+    <section id="dashboardSection" class="section animated">
+      <div class="skye-bg">SKYE</div>
+      <h2 class="section-title">Welcome to Your Dashboard</h2>
+      <div class="dashboard-circle">
+        <div class="dashboard-circle-inner">
+          <button class="circle-btn" id="claimBtn">+100 SKYE</button>
+          <span class="circle-countdown" id="claimCountdown" style="display:none;"></span>
+        </div>
+      </div>
+      <div class="section-desc" style="margin-bottom:2.2rem;">
+        Earn daily claim and extra SKYE by connecting with us on social media!
+      </div>
+      <div class="social-grid" id="socialGrid"></div>
+      <form class="poa-form" id="poaForm" autocomplete="off">
+        <label for="poaCode">ENTER PROOF OF ACTION CODE:</label>
+        <input type="text" id="poaCode" placeholder="SKYEACTION123" autocomplete="off" required>
+        <button type="submit" class="submit-btn" id="poaSubmitBtn">Claim 700 SKYE</button>
+        <div class="error-msg" id="poaError" style="display:none;"></div>
+        <div class="success-msg" id="poaSuccess" style="display:none;"></div>
+      </form>
+    </section>
+
+    <!-- P2P Section -->
+    <section id="p2pSection" class="section animated" style="display:none;">
+      <h2 class="section-title">⚡ SKYE P2P ⚡</h2>
+      <div class="p2p-info">
+        <b>Sell your SKYE for USDT safely and instantly.</b><br>
+        <ul style="margin: 1rem 0;">
+          <li>Minimum SKYE to Sell: 100</li>
+          <li>Maximum SKYE to Sell: 1000</li>
+          <li>Price per SKYE: <b>0.005 USDT</b></li>
+        </ul>
+        <div>💬 Trusted P2P system – we only use verified buyers.</div>
+        <div>💸 Your payment is sent fast via Binance or Bybit (Email, Phone, User ID).</div>
+        <div>📞 Stay active on Telegram to receive instant confirmation.</div>
+        <div style="margin-top:.9rem; color:#16c784">🔥 Keep pushing. This is your journey. Every SKYE you earn gets you closer.<br>Don't give up now – you’re building and learning something big. 💪</div>
+      </div>
+      <button class="p2p-big-btn" id="sellSkyeBtn">Sell SKYE</button>
+      <form class="p2p-form" id="p2pForm1" style="display:none;">
+        <label>Amount of SKYE to sell:</label>
+        <input type="number" id="p2pSkyeAmount" min="100" max="1000" step="1" placeholder="e.g. 1000">
+        <label>Equivalent in USDT (auto):</label>
+        <input type="text" id="p2pUsdtAmount" readonly>
+        <button type="button" class="action-btn" id="p2pNextBtn">Next</button>
+      </form>
+      <form class="p2p-form" id="p2pForm2" style="display:none;">
+        <label>Payment receiving Address:</label>
+        <input type="text" id="p2pPayAddress" placeholder="Your CEX Email, Phone, or UserID">
+        <div style="color:#b2cdfa;font-size:.98rem;margin-bottom:.6rem;">
+          <b>We only send payment to CEX (Binance, Bybit) registered email, phone number, or user ID.<br>
+          Once you submit this form, your order will be reviewed by our verified buyer.<br>
+          Make sure all details are correct to avoid delays.<br>
+          Don't forget to put your Telegram contact so we can send you a confirmation message.</b>
+        </div>
+        <label>Telegram Contact:</label>
+        <input type="text" id="p2pTelegram" placeholder="@yourusername">
+        <label>CEX NAME (E.G BINANCE, BYBIT):</label>
+        <input type="text" id="p2pCexName" placeholder="BINANCE, BYBIT">
+        <button type="button" class="action-btn" id="p2pSubmitBtn">Submit Trade</button>
+      </form>
+      <div class="p2p-confirm" id="p2pTradeConfirm" style="display:none;"></div>
+    </section>
+
+    <!-- Premium Section -->
+    <section id="premiumSection" class="section animated" style="display:none;">
+      <h2 class="section-title">💎 SKYE PREMIUM 💎</h2>
+      <div class="card">
+        <div class="card-title">Unlock VIP Benefits and Boost Your SKYE Earnings!</div>
+        <ul>
+          <li>✅ Daily Claim: <b>+2000 SKYE</b></li>
+          <li>✅ Fast-track in P2P Trades</li>
+          <li>✅ Play-to-Earn Access</li>
+          <li>✅ Premium Badge on Profile</li>
+          <li>✅ Early Access to New Features</li>
+        </ul>
+        <div style="font-weight:600; margin:1.1rem 0;">
+          💰 One-time Subscription Fee:<br>
+          <span style="font-size:1.25rem;color:var(--success);">→ $5 USDT (BEP20)</span>
+        </div>
+        <button class="p2p-big-btn" id="subscribePremiumBtn">Subscribe to Premium</button>
+      </div>
+      <form class="premium-form" id="premiumRequestForm" style="display:none;">
+        <label>Send your payment to:<br>
+          <span style="display:inline-block;margin-top:.4rem;background:var(--surface);padding:.4rem 1rem;border-radius:7px;">
+            <b>USDT (BEP20): <span id="premiumWallet">0x73cd3eecf1f6bbeee59a83bbc90b672302087793</span></b>
+            <button type="button" class="copy-btn" id="copyPremiumWallet">Copy</button>
+          </span>
+        </label>
+        <label>Skye User Info (e.g., username or registered email):</label>
+        <input type="text" id="premiumUserInfo" placeholder="e.g. @yourUsername or email">
+        <label>Telegram contact:</label>
+        <input type="text" id="premiumTelegram" placeholder="@yourusername">
+        <label>Transaction ID:</label>
+        <input type="text" id="premiumTxnId" placeholder="Paste your TXN hash">
+        <button type="button" class="action-btn" id="premiumSubmitBtn">Submit Request</button>
+      </form>
+      <div class="p2p-confirm" id="premiumWait" style="display:none;"></div>
+    </section>
+
+    <!-- Wallet Section -->
+    <section id="walletSection" class="section animated" style="display:none;">
+      <h2 class="section-title">💼 SKYE WALLET</h2>
+      <div class="wallet-balance" id="walletBalance">[ 0.00 SKYE ]</div>
+      <button class="wallet-connect-btn" id="walletConnectBtn">Connect Wallet</button>
+      <div class="wallet-warning">⚠️ Only BEP-20 wallets are supported.</div>
+      <div class="wallet-actions">
+        <button class="wallet-action-btn">Withdraw SKYE</button>
+        <button class="wallet-action-btn">Deposit SKYE</button>
+      </div>
+    </section>
+
+    <!-- Profile Section -->
+    <section id="profileSection" class="section animated" style="display:none;">
+      <div class="profile-card">
+        <div class="profile-title">👤 SKYE PROFILE</div>
+        <div class="profile-row"><span class="profile-label">Username:</span> <span class="profile-value" id="profileUsername">@SkyeUser</span></div>
+        <div class="profile-row"><span class="profile-label">Status:</span> <span class="profile-value" id="profileStatus">Free <span class="profile-badge free">Free</span></span></div>
+        <div class="profile-row"><span class="profile-label">Balance:</span> <span class="profile-value" id="profileBalance">0 SKYE</span></div>
+        <div class="profile-row"><span class="profile-label">Referrals:</span> <span class="profile-value" id="profileReferrals">0</span></div>
+        <div class="progress-container">
+          <div class="progress-label">🎁 Unlock Premium by Referring 50 Users</div>
+          <div class="progress-bar-wrap">
+            <div class="progress-bar" id="refProgressBar" style="width:0%"></div>
+          </div>
+          <span id="refProgressText">0 / 50</span>
+          <span class="progress-percent" id="refProgressPercent">0% Completed</span>
+        </div>
+        <div style="margin-top:.8rem"><b>🔄 <span id="refLeft">50</span> Referrals Left</b></div>
+        <div style="margin:1.1rem 0 .9rem 0;">
+          <span class="profile-ref-link" id="inviteLink">skye.app/invite/SKYE_SkyeUser</span>
+          <button class="ref-copy-btn" id="copyInviteLinkBtn">📋 Copy Link</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Roadmap -->
+    <section id="roadmapSection" class="section animated" style="display:none;">
+      <h2 class="section-title">SKYE ROADMAP</h2>
+      <img src="https://i.imgur.com/vNooU8l.png" alt="Skye Roadmap" class="roadmap-img">
+    </section>
+    <!-- Whitepaper -->
+    <section id="whitepaperSection" class="section animated" style="display:none;">
+      <h2 class="section-title">🟦 SKYE WHITE PAPER</h2>
+      <div class="whitepaper-content" style="white-space:pre-line;">
+Version 1.0 – June 2025
+
+🔷 1. Introduction
+Skye is a decentralized Web3 platform that rewards users with SKYE tokens for completing real-world and online actions. Unlike traditional mining, Skye introduces a novel Proof of Action (PoA) system that enables users to "mine" tokens by participating in meaningful tasks such as visiting social platforms, sharing content, or interacting with dApp features. Our mission is to create a fair and engaging earning environment for all.
+
+🔷 2. Vision & Mission
+Vision: To become the leading Proof-of-Action platform where users mine value through engagement and trust.
+Mission: To gamify user actions, enhance community interaction, and provide real earning opportunities through decentralized technology.
+
+🔷 3. How Skye Works
+Skye is built to reward engagement. Every action, from logging in to referring a friend or clicking a social media link, has value.
+The dApp includes the following core sections:
+• Dashboard – Daily token claims, task list with rewards, and social bonus actions
+• Wallet – View SKYE balance and premium status
+• P2P Trading – Buy or sell SKYE tokens directly (admin-curated)
+• Proof of Action (PoA) – Submit secret codes to prove task completion
+• Premium – Unlock higher rewards and exclusive access
+• Play to Earn – Coming soon!
+
+🔷 4. Proof of Action (PoA)
+Skye’s PoA system replaces traditional mining with verifiable tasks. Here’s how it works:
+- The user is told to visit a specific link (e.g., Telegram message or social media post).
+- A unique code (e.g., SKYE-2050-PROOF) is displayed in that post.
+- The user copies the code and inputs it into the Skye app.
+- If the code is valid and unused, the user earns +700 SKYE instantly.
+This system ensures users genuinely perform valuable actions while preventing bots or abuse.
+
+🔷 5. Tokenomics
+Token Name: SKYE
+Total Supply: 100,000,000 SKYE
+Initial Supply for Rewards: 50,000,000 SKYE
+Daily Claim (Free Users): 50 SKYE
+Daily Claim (Premium Users): 2000 SKYE
+Social Media Bonus (Per Platform): 50 SKYE
+PoA Task Reward: 700 SKYE
+Distribution:
+Community Rewards 50% 50,000,000
+Premium Bonus Pool 20% 20,000,000
+Team & Development 15% 15,000,000
+Reserve 10% 10,000,000
+Liquidity & P2P 5% 5,000,000
+
+🔷 6. Premium System
+Skye users can upgrade to Premium by sending a payment to the admin. Once manually approved, premium users unlock:
++2000 SKYE daily
+Priority in P2P trading
+Exclusive tasks and bonuses
+Premium status can be confirmed in the wallet section and is verified by the admin manually.
+
+🔷 7. P2P Trading System
+The Skye P2P section allows users to sell SKYE to trusted buyers manually approved by the admin.
+Admin selects buyers and sets trade time windows.
+A countdown shows when users can trade.
+No automatic smart contract yet; trades are done via wallet transactions, coordinated inside the dApp.
+
+🔷 8. Referral Program
+Users who invite friends to Skye can earn referral bonuses. Each new user starts with 100 SKYE, and referrers may get extra rewards (coming soon in future updates).
+
+🔷 9. Roadmap
+Phase Timeline Goal
+Phase 1 May–June 2025 Build frontend prototype, integrate reward logic
+Phase 2 July 2025 Launch premium feature, set up admin panel
+Phase 3 August 2025 Add Play-to-Earn mini-games, improve mobile layout
+Phase 4 Q4 2025 Launch backend for code validation and smart contract rewards
+
+🔷 10. Team
+The Skye team is currently pseudonymous but transparent with progress. Community trust and open development are our focus. A full team reveal may follow post-beta launch.
+
+🔷 11. Contact & Community
+Telegram: Join Our Group
+Facebook: Skye Page
+Email: skyeweb3@gmail.com
+Blog: Skye Official Blog
+Skye is a community-driven Web3 project. It is not a financial investment. The SKYE token holds no guaranteed market value and should be used for engagement and utility inside the platform only.
+
+✅ Final Note
+Skye is built for the next generation of digital action-takers. If you believe in earning by engaging, growing through proof of work you can control, and shaping Web3 with community-first thinking—Skye is your home
+      </div>
+    </section>
+    <!-- Play2Earn -->
+    <section id="play2earnSection" class="section animated" style="display:none;">
+      <div class="coming-soon">🎮 Play to Earn<br><br>Coming Soon!</div>
+    </section>
+    <!-- Earn Plus -->
+    <section id="earnplusSection" class="section animated" style="display:none;">
+      <h2 class="section-title">💸 EARN SKYE (EARN+)</h2>
+      <div class="card-title">
+        🚀 Complete tasks on our official social pages to earn SKYE instantly!<br>
+        <span style="font-size:.98rem; color:#d2e4ffcc;">Each button opens the task page. Complete it, then return here.</span>
+      </div>
+      <div class="earnplus-grid" id="earnplusGrid"></div>
+    </section>
+    <!-- Contact Us -->
+    <section id="contactSection" class="section animated" style="display:none;">
+      <h2 class="section-title">Contact Us</h2>
+      <div class="contact-links">
+        <a class="contact-link" href="https://t.me/theweb3catalyst" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24"><path fill="currentColor" d="M9.04 16.62l-.39 4.19c.56 0 .8-.24 1.1-.53l2.65-2.49 5.5 4.02c1.01.56 1.72.26 1.98-.93l3.6-16.77c.32-1.5-.53-2.1-1.53-1.77l-21.3 8.21c-1.45.54-1.44 1.3-.26 1.65l5.45 1.7 12.63-7.97c.59-.37 1.13-.17.69.2z"/></svg>
+          Telegram
+        </a>
+        <a class="contact-link" href="https://wa.me/2349131779090" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24"><path fill="currentColor" d="M20.52 3.48A12.06 12.06 0 0 0 12 0C5.37 0 0 5.37 0 12c0 2.11.54 4.1 1.57 5.9l-1.6 6.17a1 1 0 0 0 1.23 1.23l6.17-1.6A11.96 11.96 0 0 0 12 24c6.63 0 12-5.37 12-12c0-3.19-1.23-6.18-3.48-8.52zM12 22c-1.84 0-3.62-.51-5.14-1.45l-.37-.22l-3.56.93.93-3.56l-.22-.37A9.96 9.96 0 0 1 2 12c0-5.52 4.48-10 10-10s10 4.48 10 10c0 5.52-4.48 10-10 10zm6.16-6.66c-.27-.41-.55-.53-.97-.36c-.27.11-.55.23-.8.36c-.32.16-.64.13-.88-.1c-.44-.39-.87-.8-1.24-1.26c-.22-.27-.22-.49-.01-.76c.21-.28.46-.59.68-.89c.2-.27.18-.51-.05-.75c-.24-.24-.48-.48-.72-.72c-.24-.23-.48-.24-.75-.05c-.3.22-.61.47-.89.68c-.27.21-.49.21-.76-.01c-.46-.37-.87-.8-1.26-1.24c-.23-.24-.26-.56-.1-.88c.13-.25.25-.53.36-.8c.16-.42.05-.7-.36-.97c-.34-.26-.68-.53-1.04-.78c-.41-.27-.76-.16-.97.3c-.23.52-.42 1.07-.54 1.63c-.28 1.34.01 2.84 1.04 3.87c1.04 1.04 2.53 1.32 3.88 1.04c.56-.12 1.11-.31 1.63-.54c.46-.21.57-.56.3-.97c-.25-.36-.52-.7-.78-1.04z"/></svg>
+          WhatsApp
+        </a>
+        <a class="contact-link" href="https://x.com/BashirAbdu32342" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24"><path fill="currentColor" d="M23.954 4.569c-.885.389-1.83.654-2.825.775c1.014-.611 1.794-1.574 2.163-2.724c-.949.555-2.005.959-3.127 1.184c-.897-.959-2.178-1.555-3.594-1.555c-2.723 0-4.928 2.206-4.928 4.928c0 .39.045.765.127 1.124C7.691 8.095 4.066 6.13 1.64 3.161c-.427.722-.666 1.561-.666 2.475c0 1.708.87 3.216 2.188 4.099c-.807-.026-1.566-.247-2.229-.616c0 .021 0 .042 0 .063c0 2.385 1.693 4.374 3.946 4.827c-.413.112-.849.171-1.296.171c-.314 0-.615-.03-.916-.086c.631 1.953 2.445 3.377 4.6 3.417c-1.68 1.317-3.809 2.1-6.102 2.1c-.396 0-.788-.023-1.175-.069c2.189 1.394 4.768 2.209 7.557 2.209c9.054 0 14.002-7.496 14.002-13.986c0-.21 0-.422-.016-.632c.961-.689 1.8-1.56 2.462-2.548l-.047-.02z"/></svg>
+          X (Twitter)
+        </a>
+        <a class="contact-link" href="https://facebook.com/theweb3catalyst" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24"><path fill="currentColor" d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 5 3.66 9.13 8.44 9.88v-6.99H7.9v-2.89h2.54V9.41c0-2.5 1.49-3.89 3.77-3.89c1.09 0 2.23.2 2.23.2v2.45h-1.26c-1.24 0-1.63.77-1.63 1.56v1.88h2.77l-.44 2.89h-2.33v6.99C18.34 21.13 22 17 22 12z"/></svg>
+          Facebook
+        </a>
+      </div>
+    </section>
+    <!-- Tokenomics -->
+    <section id="tokenomicsSection" class="section animated" style="display:none;">
+      <h2 class="section-title">💎 TOKENOMICS</h2>
+      <div class="tokenomics-content" style="white-space:pre-line;">
+📊 SKYE Token Allocation
+
+🔹 Total Supply: 1,000,000,000 SKYE
+
+Allocation Area             Percentage     SKYE Tokens
+🏆 Rewards & Tasks             30%         300,000,000 SKYE
+🌐 Community Airdrop           10%         100,000,000 SKYE
+🔒 Team & Devs                 10%         100,000,000 SKYE
+💼 Marketing                   10%         100,000,000 SKYE
+💧 Liquidity Pool              10%         100,000,000 SKYE
+🛠️ Ecosystem Growth            10%         100,000,000 SKYE
+🤝 P2P Trade Allocation        20%         200,000,000 SKYE
+
+📈 Distribution Timeline
+
+✅ Q2 2025: Launch, Rewards Start
+🕒 Q3 2025: Listings, Staking
+🔜 Q4 2025: Governance Launch approval
+      </div>
+    </section>
+  </main>
+  <!-- Bottom Navbar -->
+  <nav class="bottom-navbar" id="bottomNavbar">
+    <button class="nav-btn active" data-section="dashboard">
+      <span>📊</span>
+      <span>Dashboard</span>
+    </button>
+    <button class="nav-btn" data-section="p2p">
+      <span>🔄</span>
+      <span>P2P</span>
+    </button>
+    <button class="nav-btn" data-section="wallet">
+      <span>💼</span>
+      <span>Wallet</span>
+    </button>
+    <button class="nav-btn" data-section="premium">
+      <span>🌟</span>
+      <span>Premium</span>
+    </button>
+  </nav>
+  <script>
+  //--- Data Simulation (for demo) ---
+  let user = {
+    username: "@SkyeUser",
+    status: "Free", // or "Premium"
+    profilePic: "https://randomuser.me/api/portraits/men/32.jpg",
+    balance: 1200,
+    referrals: 6,
+    inviteCode: "SKYE_@SkyeUser",
+    inviteLink: "skye.app/invite/SKYE_@SkyeUser"
+  };
+
+  // Timers (simulate cooldowns)
+  let claimCooldown = null; // Date.now() + ms
+  let socialCooldown = {};  // key: index, value: Date.now() + ms
+  let poaCooldown = null;
+  let earnPlusCooldown = {};
+
+  // Section switch logic
+  const sections = [
+    "dashboard", "p2p", "wallet", "profile",
+    "roadmap", "whitepaper", "play2earn", "earnplus",
+    "contact", "tokenomics", "premium"
+  ];
+  function showSection(section) {
+    sections.forEach(s => {
+      const el = document.getElementById(s + "Section");
+      if(el) el.style.display = (s === section ? "" : "none");
+    });
+    // Sidebar highlight
+    document.querySelectorAll('.sidebar .nav-link').forEach(link=>{
+      link.classList.toggle("active", link.dataset.section === section);
+    });
+    // Bottom nav highlight
+    document.querySelectorAll('.bottom-navbar .nav-btn').forEach(btn=>{
+      btn.classList.toggle("active", btn.dataset.section === section);
+    });
+    // Scroll to top
+    document.body.scrollTop = 0; document.documentElement.scrollTop = 0;
+  }
+  // Sidebar toggle
+  const sidebar = document.getElementById("sidebar");
+  const sidebarOverlay = document.getElementById("sidebarOverlay");
+  document.getElementById("menuBtn").onclick = function() {
+    sidebar.classList.toggle("closed");
+    sidebarOverlay.classList.toggle("open", !sidebar.classList.contains("closed"));
+  };
+  sidebarOverlay.onclick = () => {
+    sidebar.classList.add("closed");
+    sidebarOverlay.classList.remove("open");
+  };
+  // Nav links
+  document.querySelectorAll('.sidebar .nav-link').forEach(link=>{
+    link.onclick = function(e){
+      e.preventDefault();
+      showSection(this.dataset.section);
+      sidebar.classList.add("closed");
+      sidebarOverlay.classList.remove("open");
+    };
+  });
+  document.querySelectorAll('.bottom-navbar .nav-btn').forEach(btn=>{
+    btn.onclick = function(e){
+      e.preventDefault();
+      showSection(this.dataset.section);
+    };
+  });
+
+  //--- Dashboard: Daily Claim Logic ---
+  const claimBtn = document.getElementById("claimBtn");
+  const claimCountdown = document.getElementById("claimCountdown");
+  function updateClaimBtn() {
+    let now = Date.now();
+    if(claimCooldown && claimCooldown > now) {
+      claimBtn.disabled = true;
+      let left = Math.floor((claimCooldown-now)/1000);
+      let hrs = Math.floor(left/3600), min=Math.floor((left%3600)/60), sec=left%60;
+      claimCountdown.style.display = ""; claimCountdown.textContent = `Next claim in ${hrs}h ${min}m ${sec}s`;
+      claimBtn.textContent = "+100 SKYE";
+    } else {
+      claimBtn.disabled = false;
+      claimBtn.textContent = "+100 SKYE";
+      claimCountdown.style.display = "none";
+    }
+  }
+  claimBtn.onclick = function() {
+    user.balance += 100;
+    updateBalanceDisplays();
+    claimCooldown = Date.now() + 24*3600*1000; // 24hr
+    updateClaimBtn();
+    localStorage.setItem("skye_claim_cd", claimCooldown);
+  };
+  setInterval(updateClaimBtn, 1000);
+
+  //--- Dashboard: Social Earn Grid ---
+  const socialBtnsData = [
+    { logo:'telegram', label:'+300 SKYE', url:"https://t.me/theweb3catalyst"},
+    { logo:'x', label:'+300 SKYE', url:"https://x.com/BashirAbdu32342/status/1905718498858512631?t=QlFwMH6VpXDCqnSKcFv5lA&s=19"},
+    { logo:'youtube', label:'+300 SKYE', url:"https://youtu.be/tVHrkRerhiI?si=QH00KGJqAYtLoxIN"},
+    { logo:'facebook', label:'+300 SKYE', url:"https://www.facebook.com/100077265377140/posts/677178321534341/?mibextid=rS40aB7S9Ucbxw6v"},
+    { logo:'tiktok', label:'+300 SKYE', url:"https://vm.tiktok.com/ZMSP35rxX/"},
+    { logo:'x', label:'+300 SKYE', url:"https://x.com/BashirAbdu32342/status/1891767021466947604?t=iM70a5TP5H31gkqL18M8jg&s=19"},
+    { logo:'youtube', label:'+300 SKYE', url:"https://youtu.be/tVHrkRerhiI?si=QH00KGJqAYtLoxIN"},
+    { logo:'whatsapp', label:'+300 SKYE', url:"https://www.whatsapp.com/business/"},
+    { logo:'telegram', label:'+300 SKYE', url:"https://t.me/+0ru6onPa7EA4Yzg0"},
+    { logo:'youtube', label:'+300 SKYE', url:"https://youtu.be/Fysj9K8xQKQ?si=GIaLqZID8LSx1khD"}
+  ];
+  const socialGrid = document.getElementById("socialGrid");
+  function renderSocialBtns() {
+    socialGrid.innerHTML = '';
+    socialBtnsData.forEach((btn, i) => {
+      let el = document.createElement("button");
+      el.className = "social-btn";
+      el.innerHTML = `<span class="logo">${getLogoIcon(btn.logo)}</span> ${btn.label}`;
+      el.onclick = async function() {
+        if(socialCooldown[i] && socialCooldown[i] > Date.now()) return;
+        el.disabled = true;
+        el.innerHTML = `<span class="verify-spinner"></span>Verifying...`;
+        window.open(btn.url, '_blank');
+        setTimeout(()=> {
+          user.balance += 300;
+          updateBalanceDisplays();
+          el.disabled = true;
+          let cooldown = Date.now() + 8*3600*1000;
+          socialCooldown[i] = cooldown;
+          localStorage.setItem("skye_social_cd_"+i, cooldown);
+          updateSocialBtn(i);
+        }, 30000);
+      };
+      // cooldown check
+      updateSocialBtn(i, el);
+      socialGrid.appendChild(el);
+    });
+  }
+  function updateSocialBtn(i, el) {
+    let btn = el || socialGrid.children[i];
+    if(!btn) return;
+    let now = Date.now();
+    let cd = socialCooldown[i] || parseInt(localStorage.getItem("skye_social_cd_"+i)) || 0;
+    if(cd > now) {
+      btn.disabled = true;
+      let left = Math.floor((cd-now)/1000);
+      let hrs = Math.floor(left/3600), min=Math.floor((left%3600)/60), sec=left%60;
+      btn.innerHTML = `<span class="logo">${getLogoIcon(socialBtnsData[i].logo)}</span> <span style="font-size:.92rem;color:#2d9cdb;">Cooldown: ${hrs}h ${min}m ${sec}s</span>`;
+    } else {
+      btn.disabled = false;
+      btn.innerHTML = `<span class="logo">${getLogoIcon(socialBtnsData[i].logo)}</span> ${socialBtnsData[i].label}`;
+    }
+  }
+  setInterval(()=>{
+    socialBtnsData.forEach((_,i)=>updateSocialBtn(i));
+  }, 1000);
+
+  //--- Dashboard: POA (Proof of Action) Form ---
+  const poaForm = document.getElementById("poaForm");
+  const poaCode = document.getElementById("poaCode");
+  const poaSubmitBtn = document.getElementById("poaSubmitBtn");
+  const poaError = document.getElementById("poaError");
+  const poaSuccess = document.getElementById("poaSuccess");
+  function updatePOAForm() {
+    if(poaCooldown && poaCooldown > Date.now()) {
+      poaSubmitBtn.disabled = true;
+      let left = Math.floor((poaCooldown-Date.now())/1000);
+      let hrs = Math.floor(left/3600), min=Math.floor((left%3600)/60), sec=left%60;
+      poaSubmitBtn.textContent = `Claim in ${hrs}h ${min}m ${sec}s`;
+    } else {
+      poaSubmitBtn.disabled = false;
+      poaSubmitBtn.textContent = "Claim 700 SKYE";
+    }
+  }
+  poaForm.onsubmit = function(e) {
+    e.preventDefault();
+    if(poaCooldown && poaCooldown>Date.now()) return;
+    // simulate backend verify
+    let code = poaCode.value.trim().toUpperCase();
+    poaError.style.display = "none"; poaSuccess.style.display = "none";
+    poaSubmitBtn.disabled = true; poaSubmitBtn.textContent = "Verifying...";
+    setTimeout(()=>{
+      if(code === "SKYEACTION123") {
+        user.balance += 700;
+        updateBalanceDisplays();
+        poaSuccess.textContent = "✅ Code valid! +700 SKYE added.";
+        poaSuccess.style.display = "";
+        poaCooldown = Date.now() + 12*3600*1000;
+        localStorage.setItem("skye_poa_cd", poaCooldown);
+        poaForm.reset();
+      } else {
+        poaError.textContent = "❌ Invalid code. Try again.";
+        poaError.style.display = "";
+      }
+      updatePOAForm();
+    }, 1400);
+  };
+  setInterval(updatePOAForm, 1000);
+
+  //--- P2P Section Logic ---
+  document.getElementById("sellSkyeBtn").onclick = function() {
+    document.getElementById("p2pForm1").style.display = "";
+    document.getElementById("p2pForm2").style.display = "none";
+    document.getElementById("p2pTradeConfirm").style.display = "none";
+  };
+  document.getElementById("p2pSkyeAmount").oninput = function() {
+    let val = parseInt(this.value)||0;
+    if(val<100) this.value=100;
+    if(val>1000) this.value=1000;
+    let usdt = (parseInt(this.value)||0) * 0.005;
+    document.getElementById("p2pUsdtAmount").value = "$" + usdt.toFixed(2);
+  };
+  document.getElementById("p2pNextBtn").onclick = function() {
+    if(parseInt(document.getElementById("p2pSkyeAmount").value)<100) return alert("Minimum is 100 SKYE");
+    document.getElementById("p2pForm1").style.display = "none";
+    document.getElementById("p2pForm2").style.display = "";
+  };
+  document.getElementById("p2pSubmitBtn").onclick = function() {
+    let amt = parseInt(document.getElementById("p2pSkyeAmount").value)||0;
+    let usdt = (amt*0.005).toFixed(2);
+    let pay = document.getElementById("p2pPayAddress").value.trim();
+    let tg = document.getElementById("p2pTelegram").value.trim();
+    let cex = document.getElementById("p2pCexName").value.trim();
+    if(!pay || !tg || !cex) return alert("All fields required");
+    document.getElementById("p2pForm2").style.display = "none";
+    let html = `✅ Trade Submitted Successfully!<br>
+      <b>SKYE Sold:</b> ${amt}<br>
+      <b>USDT to Receive:</b> $${usdt}<br>
+      <b>Payment Address:</b> ${pay}<br>
+      <b>Telegram:</b> ${tg}<br>
+      <br>Your trade is now under review. You’ll be contacted via Telegram shortly.`;
+    document.getElementById("p2pTradeConfirm").innerHTML = html;
+    document.getElementById("p2pTradeConfirm").style.display = "";
+    // Optionally, update user.balance -= amt; updateBalanceDisplays();
+  };
+
+  //--- Premium Subscription Section ---
+  document.getElementById("subscribePremiumBtn").onclick = function() {
+    document.getElementById("premiumRequestForm").style.display = "";
+    document.getElementById("premiumWait").style.display = "none";
+  }
+  document.getElementById("copyPremiumWallet").onclick = function() {
+    let addr = document.getElementById("premiumWallet").textContent;
+    navigator.clipboard.writeText(addr);
+    this.textContent = "Copied!";
+    setTimeout(()=>this.textContent="Copy",1200);
+  }
+  document.getElementById("premiumSubmitBtn").onclick = function() {
+    let userf = document.getElementById("premiumUserInfo").value.trim();
+    let tgf = document.getElementById("premiumTelegram").value.trim();
+    let txn = document.getElementById("premiumTxnId").value.trim();
+    if(!userf || !tgf || !txn) return alert("All fields required");
+    document.getElementById("premiumRequestForm").style.display = "none";
+    let t = 3600; // 1hr
+    let end = Date.now()+t*1000;
+    updatePremiumWait(end);
+    document.getElementById("premiumWait").style.display = "";
+  }
+  function updatePremiumWait(end) {
+    let left = Math.max(0, Math.floor((end-Date.now())/1000));
+    let hrs = Math.floor(left/3600), min=Math.floor((left%3600)/60), sec=left%60;
+    document.getElementById("premiumWait").innerHTML = `⏳ Please wait for verify. Time left: <b>${hrs}h ${min}m ${sec}s</b><br>
+    ⚠️ Your request will be manually reviewed by our admin.<br>You’ll get confirmation via Telegram once approved.`;
+    if(left>0) setTimeout(()=>updatePremiumWait(end), 1000);
+    else document.getElementById("premiumWait").innerHTML = `✅ Request submitted for review. Please check Telegram for updates!`;
+  }
+
+  //--- Wallet Section ---
+  document.getElementById("walletConnectBtn").onclick = function() {
+    window.open("https://metamask.io/", "_blank");
+  }
+
+  //--- Profile Section ---
+  document.getElementById("copyInviteLinkBtn").onclick = function() {
+    let link = user.inviteLink;
+    navigator.clipboard.writeText(link);
+    this.textContent = "Copied!";
+    setTimeout(()=>this.textContent="📋 Copy Link",1100);
+  }
+
+  //--- Earn Plus Section ---
+  const earnplusBtnsData = [
+    {logo:'youtube', label:'+400 SKYE', url: "https://youtu.be/tVHrkRerhiI?si=QH00KGJqAYtLoxIN"},
+    {logo:'x', label:'+400 SKYE', url:"https://x.com/BashirAbdu32342/status/1905718498858512631?t=QlFwMH6VpXDCqnSKcFv5lA&s=19"},
+    {logo:'telegram', label:'+400 SKYE', url:"https://t.me/theweb3catalyst"},
+    {logo:'facebook', label:'+400 SKYE', url:"https://facebook.com/theweb3catalyst"},
+    {logo:'youtube', label:'+400 SKYE', url: "https://youtu.be/tVHrkRerhiI?si=QH00KGJqAYtLoxIN"},
+    {logo:'x', label:'+400 SKYE', url:"https://x.com/BashirAbdu32342/status/1891767021466947604?t=iM70a5TP5H31gkqL18M8jg&s=19"},
+    {logo:'telegram', label:'+400 SKYE', url:"https://t.me/+0ru6onPa7EA4Yzg0"},
+    {logo:'x', label:'+400 SKYE', url:"https://x.com/BashirAbdu32342"}
+  ];
+  const earnplusGrid = document.getElementById("earnplusGrid");
+  function renderEarnplusBtns() {
+    earnplusGrid.innerHTML = '';
+    earnplusBtnsData.forEach((btn, i) => {
+      let el = document.createElement("button");
+      el.className = "earnplus-btn";
+      el.innerHTML = `<span class="logo">${getLogoIcon(btn.logo)}</span> ${btn.label}`;
+      el.onclick = async function() {
+        if(earnPlusCooldown[i] && earnPlusCooldown[i] > Date.now()) return;
+        el.disabled = true;
+        el.innerHTML = `<span class="verify-spinner"></span>Verifying...`;
+        window.open(btn.url, '_blank');
+        setTimeout(()=> {
+          user.balance += 400;
+          updateBalanceDisplays();
+          el.disabled = true;
+          let cooldown = Date.now() + 8*3600*1000;
+          earnPlusCooldown[i] = cooldown;
+          localStorage.setItem("skye_earnplus_cd_"+i, cooldown);
+          updateEarnplusBtn(i);
+        }, 30000);
+      };
+      // cooldown check
+      updateEarnplusBtn(i, el);
+      earnplusGrid.appendChild(el);
+    });
+  }
+  function updateEarnplusBtn(i, el) {
+    let btn = el || earnplusGrid.children[i];
+    if(!btn) return;
+    let now = Date.now();
+    let cd = earnPlusCooldown[i] || parseInt(localStorage.getItem("skye_earnplus_cd_"+i)) || 0;
+    if(cd > now) {
+      btn.disabled = true;
+      let left = Math.floor((cd-now)/1000);
+      let hrs = Math.floor(left/3600), min=Math.floor((left%3600)/60), sec=left%60;
+      btn.innerHTML = `<span class="logo">${getLogoIcon(earnplusBtnsData[i].logo)}</span> <span style="font-size:.92rem;color:#2d9cdb;">Cooldown: ${hrs}h ${min}m ${sec}s</span>`;
+    } else {
+      btn.disabled = false;
+      btn.innerHTML = `<span class="logo">${getLogoIcon(earnplusBtnsData[i].logo)}</span> ${earnplusBtnsData[i].label}`;
+    }
+  }
+  setInterval(()=>{
+    earnplusBtnsData.forEach((_,i)=>updateEarnplusBtn(i));
+  }, 1000);
+
+  //--- Helper: Update Balance displays everywhere ---
+  function updateBalanceDisplays() {
+    document.getElementById("walletBalance").textContent = `[ ${user.balance.toLocaleString()} SKYE ]`;
+    document.getElementById("profileBalance").textContent = `${user.balance.toLocaleString()} SKYE`;
+  }
+
+  //--- Profile logic ---
+  function updateProfile() {
+    document.getElementById("profileUsername").textContent = user.username;
+    document.getElementById("profileStatus").innerHTML = user.status + " <span class='profile-badge " + (user.status.toLowerCase()=="premium"?"":"free")+"'>" + user.status + "</span>";
+    document.getElementById("profileBalance").textContent = user.balance.toLocaleString() + " SKYE";
+    document.getElementById("profileReferrals").textContent = user.referrals;
+    let prog = Math.min(50, user.referrals);
+    let percent = Math.floor((prog/50)*100);
+    document.getElementById("refProgressBar").style.width = percent+"%";
+    document.getElementById("refProgressText").textContent = `${prog} / 50`;
+    document.getElementById("refProgressPercent").textContent = `${percent}% Completed`;
+    document.getElementById("refLeft").textContent = 50-prog;
+    document.getElementById("inviteLink").textContent = user.inviteLink;
+  }
+
+  //--- Load state from localStorage ---
+  window.onload = function() {
+    // Load cooldowns from localStorage
+    claimCooldown = parseInt(localStorage.getItem("skye_claim_cd")) || null;
+    poaCooldown = parseInt(localStorage.getItem("skye_poa_cd")) || null;
+    for(let i=0;i<socialBtnsData.length;i++)
+      socialCooldown[i] = parseInt(localStorage.getItem("skye_social_cd_"+i)) || null;
+    for(let i=0;i<earnplusBtnsData.length;i++)
+      earnPlusCooldown[i] = parseInt(localStorage.getItem("skye_earnplus_cd_"+i)) || null;
+    renderSocialBtns();
+    renderEarnplusBtns();
+    updateClaimBtn();
+    updatePOAForm();
+    updateBalanceDisplays();
+    updateProfile();
+    document.getElementById("profilePic").src = user.profilePic;
+    showSection("dashboard");
+  };
+
+  // Utility: Get logo icon
+  function getLogoIcon(name) {
+    switch(name) {
+      case 'telegram': return `<svg width="1.6em" height="1.6em" viewBox="0 0 24 24"><path fill="#2AABEE" d="M9.04 16.62l-.39 4.19c.56 0 .8-.24 1.1-.53l2.65-2.49 5.5 4.02c1.01.56 1.72.26 1.98-.93l3.6-16.77c.32-1.5-.53-2.1-1.53-1.77l-21.3 8.21c-1.45.54-1.44 1.3-.26 1.65l5.45 1.7 12.63-7.97c.59-.37 1.13-.17.69.2z"/></svg>`;
+      case 'x': return `<svg width="1.6em" height="1.6em" viewBox="0 0 24 24"><path fill="#fff" d="M10.477 10.774L3.346 3.03h5.43l5.215 5.979zm9.98-7.744A1.63 1.63 0 0 0 19.32 2H4.684c-.392 0-.758.14-1.137.418l7.019 7.994 8.891-8.382zm-2.44 10.135l5.497 6.314c.207.237.454.387.76.387c.24 0 .462-.085.671-.246c.408-.327.464-.928.155-1.354L16.38 12.14zm-2.485-2.728L3.644 21.388c-.213.228-.45.347-.709.347c-.216 0-.437-.082-.653-.246c-.387-.318-.456-.913-.147-1.346l7.241-8.32zm-11.839-1.09c-.215-.237-.462-.387-.76-.387c-.24 0-.462.085-.67.246c-.409.328-.465.928-.156 1.355l7.176 8.247zm10.669 2.732l8.198 9.632c.213.228.45.347.709.347c.216 0 .437-.082.653-.246c.387-.318.456-.913.147-1.346l-7.241-8.32zm-2.485-2.728L3.644 21.388c-.213.228-.45.347-.709.347c-.216 0-.437-.082-.653-.246c-.387-.318-.456-.913-.147-1.346l7.241-8.32z"/></svg>`;
+      case 'youtube': return `<svg width="1.6em" height="1.6em" viewBox="0 0 24 24"><path fill="#FF0000" d="M21.8 8.001c-.23-.84-.91-1.5-1.74-1.74A47.1 47.1 0 0 0 12 6c-2.02 0-4.04.07-8.06.26c-.83.24-1.51.9-1.75 1.74C2 9.97 2 12 2 12s0 2.03.19 3.99c.24.84.92 1.5 1.75 1.74c2.02.19 4.04.26 8.06.26c2.02 0 4.04-.07 8.06-.26c.83-.24 1.51-.9 1.74-1.74C22 14.03 22 12 22 12s0-2.03-.2-3.99zm-12 6.49v-5.01l5.01 2.5z"/></svg>`;
+      case 'facebook': return `<svg width="1.6em" height="1.6em" viewBox="0 0 24 24"><path fill="#1877F3" d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 5 3.66 9.13 8.44 9.88v-6.99H7.9v-2.89h2.54V9.41c0-2.5 1.49-3.89 3.77-3.89c1.09 0 2.23.2 2.23.2v2.45h-1.26c-1.24 0-1.63.77-1.63 1.56v1.88h2.77l-.44 2.89h-2.33v6.99C18.34 21.13 22 17 22 12z"/></svg>`;
+      case 'tiktok': return `<svg width="1.6em" height="1.6em" viewBox="0 0 24 24"><path fill="#fff" d="M12.725 2.006c.343.02.664.294.677.642c.06 1.583.723 3.272 2.058 4.085c.12.073.265.094.404.08c.938-.098 1.858-.317 2.753-.658c.328-.126.614.19.483.49c-.6 1.397-1.663 2.55-3.04 3.163c-2.092.928-4.633.157-5.594-2.081c-.16-.4.164-.83.599-.83c1.221 0 2.387.51 3.246 1.305c.124.112.308.08.388-.071c.926-1.7 2.885-2.346 4.624-1.919c.178.042.3.212.28.395c-.104 1.028-.336 2.053-.686 3.045c-.052.145-.191.236-.339.21c-1.177-.202-2.449.224-3.276 1.131c-.145.155-.192.385-.116.57c.635 1.523 2.157 2.548 3.752 2.548c.835 0 1.64-.241 2.294-.664c.263-.167.593.06.529.343c-.2.908-.74 1.723-1.47 2.222c-1.014.729-2.486.769-3.36-.334c-.12-.153-.31-.209-.482-.135c-1.01.411-2.201.206-2.908-.635c-.146-.176-.088-.436.13-.524c.36-.14.755-.192 1.15-.163c.117.009.232-.039.307-.13c.473-.577 1.18-.939 1.963-.939c.156 0 .292-.104.336-.258c.472-1.6 1.857-2.695 3.485-2.818c.183-.014.32-.155.303-.322c-.05-.527-.232-1.032-.522-1.462c-.117-.177-.369-.166-.485.014c-.522.814-1.399 1.357-2.295 1.357c-.783 0-1.49-.362-1.963-.939c-.075-.091-.19-.14-.308-.13c-.395.029-.79.081-1.15.163c-.218.088-.276.348-.13.524c.707.841 1.898 1.046 2.908.635c.172-.074.362-.018.482.135c.874 1.103 2.346 1.063 3.36.334c.73-.499 1.27-1.314 1.47-2.221c.064-.283-.266-.51-.529-.343c-.654.423-1.459.664-2.294.664c-1.595 0-3.117-1.025-3.752-2.548c-.076-.184-.03-.415.116-.57c.827-.907 2.099-1.333 3.276-1.131c.148.027.287-.065.339-.21c.35-.992.582-2.017.686-3.045c.02-.183-.102-.353-.28-.395c-1.739-.427-3.698.219-4.624 1.919c-.08.151-.264.183-.388.071c-.859-.795-2.025-1.305-3.246-1.305c-.435 0-.759.43-.599.83c.961 2.238 3.502 3.009 5.594 2.081c1.377-.613 2.44-1.766 3.04-3.163c.131-.3-.155-.616-.483-.49a10.046 10.046 0 0 1-2.753.658c-.139.014-.284-.007-.404-.08c-1.335-.813-1.998-2.502-2.058-4.085c-.013-.348.334-.622.677-.642z"/></svg>`;
+      case 'whatsapp': return `<svg width="1.6em" height="1.6em" viewBox="0 0 24 24"><path fill="#25D366" d="M20.52 3.48A12.06 12.06 0 0 0 12 0C5.37 0 0 5.37 0 12c0 2.11.54 4.1 1.57 5.9l-1.6 6.17a1 1 0 0 0 1.23 1.23l6.17-1.6A11.96 11.96 0 0 0 12 24c6.63 0 12-5.37 12-12c0-3.19-1.23-6.18-3.48-8.52zM12 22c-1.84 0-3.62-.51-5.14-1.45l-.37-.22l-3.56.93.93-3.56l-.22-.37A9.96 9.96 0 0 1 2 12c0-5.52 4.48-10 10-10s10 4.48 10 10c0 5.52-4.48 10-10 10zm6.16-6.66c-.27-.41-.55-.53-.97-.36c-.27.11-.55.23-.8.36c-.32.16-.64.13-.88-.1c-.44-.39-.87-.8-1.24-1.26c-.22-.27-.22-.49-.01-.76c.21-.28.46-.59.68-.89c.2-.27.18-.51-.05-.75c-.24-.24-.48-.48-.72-.72c-.24-.23-.48-.24-.75-.05c-.3.22-.61.47-.89.68c-.27.21-.49.21-.76-.01c-.46-.37-.87-.8-1.26-1.24c-.23-.24-.26-.56-.1-.88c.13-.25.25-.53.36-.8c.16-.42.05-.7-.36-.97c-.34-.26-.68-.53-1.04-.78c-.41-.27-.76-.16-.97.3c-.23.52-.42 1.07-.54 1.63c-.28 1.34.01 2.84 1.04 3.87c1.04 1.04 2.53 1.32 3.88 1.04c.56-.12 1.11-.31 1.63-.54c.46-.21.57-.56.3-.97c-.25-.36-.52-.7-.78-1.04z"/></svg>`;
+      default: return "🔗";
+    }
+  }
+  </script>
+</body>
+</html>
